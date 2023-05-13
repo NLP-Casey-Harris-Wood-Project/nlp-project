@@ -1,6 +1,4 @@
-# Project Title
-
-- Predicting Python/HTML of Github NLP Repositories
+# Predicting Python/HTML of Github NLP Repositories
 
 <!-- ![Project Banner](path/to/banner_image.png) -->
 
@@ -62,7 +60,7 @@ Web-scraped data from 500 NLP related Github repositories that contain the READM
 | ----- | ----- | ----- | ----- |
 | repo_names | object | Name of Repository | 'huggingface/transformers' |
 | contents | object | Contents of Repository's README file | 'Transformers provides thousands of pretrained...' |
-| language | object | Predominant coding language of Repository | 'Python'
+| language | object | Predominant coding language of Repository | 'Python' |
 
 
 
