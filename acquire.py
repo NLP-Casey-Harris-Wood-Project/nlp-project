@@ -28,6 +28,8 @@ REPOS = [
     "gocodeup/codeup-setup-script",
     "gocodeup/movies-application",
     "torvalds/linux",
+    'Unstructured-IO/unstructured',
+    'akoumjian/datefinder'
 ]
 
 headers = {"Authorization": f"token {github_token}", "User-Agent": github_username}
