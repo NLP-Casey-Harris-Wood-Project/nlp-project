@@ -41,7 +41,7 @@ Since HTML and Python utilizes unique syntaxes and code, then there should be un
 1. Is there unique terminology used for Python and HTML?
 2. Are there words that are used more in Python than HTML and vice versa?
 3. Are there 2-word combinations that are used more in Python than HTML and vice versa?
-4. Are there 3-word combinations that are used more in Python than HTML and vice versa?
+4. Does http occur more in Python or in HTML?
 
 ## Dataset
 
@@ -58,9 +58,10 @@ Web-scraped data from 500 NLP related Github repositories that contain the READM
 
 | Feature Name | Data Type | Description | Example |
 | ----- | ----- | ----- | ----- |
-| repo_names | object | Name of Repository | 'huggingface/transformers' |
-| contents | object | Contents of Repository's README file | 'Transformers provides thousands of pretrained...' |
+| repo | object | Name of Repository | 'huggingface/transformers' |
 | language | object | Predominant coding language of Repository | 'Python' |
+| readme_contents | object | Contents of Repository's README file | 'Transformers provides thousands of pretrained...' |
+| cleaned_readme_contents | object | Cleaned version  of contents of Repository's README file | 'transformers provides thousands pretrained...' |
 
 
 
@@ -70,6 +71,7 @@ Web-scraped data from 500 NLP related Github repositories that contain the READM
 
 <b><u><i>Instructions to Reproduce:</i></u></b>
 
+- IF YOU WANT TO SCRAPE YOUR OWN DATA...
 1. Clone this repository
 2. Generate a Github Token
 
@@ -82,6 +84,9 @@ Web-scraped data from 500 NLP related Github repositories that contain the READM
     - github_username = YOUR GITHUB USERNAME
     - github_token = TOKEN URL
 4. Run desired files
+- IF YOU WANT TO USE OUR DATA
+1. Clone this repository
+2. Run desired files
 
 <!-- - List the required Python libraries and their versions. -->
 
