@@ -40,7 +40,7 @@ import nltk
 import unicodedata
 import acquire as a
 import os
-
+from sklearn.model_selection import train_test_split
 # =======================================================================================================
 # Imports END
 # Imports TO basic_clean
@@ -269,6 +269,11 @@ def prepare_github_repositories():
             removed_target_html.append(re.sub(r'\w?html\w?', '', row))
         html_only_df.cleaned_readme_contents = removed_target_html
         prepared_github_df = pd.concat([python_only_df, html_only_df], axis=0)
+        
+        # remove rows with null readmes (6 html repos)
+        prepared_github_df = prepared_github_df[prepared_github_df.\
+                                                cleaned_readme_contents.isna() == False]
+        
         return prepared_github_df
 
 # =======================================================================================================
@@ -301,3 +306,15 @@ def wrangle_github_repositories():
 # =======================================================================================================
 # wrangle_github_repositories END
 # =======================================================================================================
+
+# split data into train, validate, test
+def train_split(df):
+    train_validate, test = train_test_split(df,
+                                            random_state=1349,
+                                            train_size=0.8,
+                                           stratify=df.language)
+    train, validate = train_test_split(train_validate,
+                                       random_state=1349,
+                                       train_size=0.7,
+                                      stratify=train_validate.language)
+    return train, validate, test
