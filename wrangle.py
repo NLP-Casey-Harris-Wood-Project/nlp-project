@@ -14,6 +14,7 @@
 9. acquire_github_repositories
 10. prepare_github_repositories
 11. wrangle_github_repositories
+12. post_explore_wrangle_github_repositories
 '''
 
 # =======================================================================================================
@@ -300,4 +301,36 @@ def wrangle_github_repositories():
 
 # =======================================================================================================
 # wrangle_github_repositories END
+# wrangle_github_repositories TO post_explore_wrangle_github_repositories
+# post_explore_wrangle_github_repositories
+# =======================================================================================================
+
+def post_explore_wrangle_github_repositories():
+    '''
+    From the wrangled 'repo.csv' data, additional preparation is applied in lieu of findings during
+    the exploratory phase and returns a new dataframe that reflects the changes made during exploration
+
+    INPUT:
+    NONE
+
+    OUTPUT:
+    post_explore_version = Pandas dataframe of findings from explore phase
+    '''
+    old_github_df = wrangle_github_repositories()
+    old_github_df = old_github_df[~old_github_df.repo.str.startswith('pemistahl')]
+    srchttps_text = []
+    for text in old_github_df.cleaned_readme_contents.astype(str):
+        regexp = r'srchttps\w+'
+        srchttps_text.append(re.sub(regexp, 'srchttps_link', text))
+    old_github_df.cleaned_readme_contents = srchttps_text
+    weird_text = []
+    for text in old_github_df.cleaned_readme_contents.astype(str):
+        regexp = r'&#9;'
+        weird_text.append(re.sub(regexp, '', text))
+    old_github_df.cleaned_readme_contents = weird_text
+    post_explore_version = old_github_df
+    return post_explore_version
+
+# =======================================================================================================
+# post_explore_wrangle_github_repositories END
 # =======================================================================================================
