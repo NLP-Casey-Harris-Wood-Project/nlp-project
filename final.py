@@ -107,19 +107,22 @@ def visual1():
     '''
     # Assuming you have a DataFrame named 'repos_df' that contains repository information
     before_df = w.wrangle_github_repositories()
-    matched_repos = before_df[before_df['cleaned_readme_contents'].str.contains("srchttps")]
+    python_df = before_df[before_df['language'] == 'Python']
+    matched_repos = python_df[python_df['cleaned_readme_contents'].str.contains("srchttps")]
     matched_repos['frequency'] = matched_repos['cleaned_readme_contents'].str.count("srchttps")
     sorted_repos = matched_repos.sort_values('frequency', ascending=False)
     repo_freq_list = sorted_repos[['repo', 'frequency']].values.tolist()
     repos = [repo for repo, freq in repo_freq_list]
     frequencies = [freq for repo, freq in repo_freq_list]
     after_df = w.post_explore_wrangle_github_repositories()
-    matched_repos_after = after_df[after_df['cleaned_readme_contents'].str.contains("srchttps")]
+    python_df_after = after_df[after_df['language'] == 'Python']
+    matched_repos_after = python_df_after[python_df_after['cleaned_readme_contents'].str.contains("srchttps")]
     matched_repos_after['frequency'] = matched_repos_after['cleaned_readme_contents'].str.count("srchttps")
     sorted_repos_after = matched_repos_after.sort_values('frequency', ascending=False)
     repo_freq_list_after = sorted_repos_after[['repo', 'frequency']].values.tolist()
     repos_after = [repo for repo, freq in repo_freq_list_after]
     frequencies_after = [freq for repo, freq in repo_freq_list_after]
+    plt.style.use('ggplot')
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     axs[0].barh(repos, frequencies)
     axs[0].set_xlabel('Frequency')
