@@ -14,6 +14,8 @@
 9. acquire_github_repositories
 10. prepare_github_repositories
 11. wrangle_github_repositories
+12. post_explore_wrangle_github_repositories
+13. train_split
 '''
 
 # =======================================================================================================
@@ -40,6 +42,7 @@ import nltk
 import unicodedata
 import acquire as a
 import os
+from sklearn.model_selection import train_test_split
 
 # =======================================================================================================
 # Imports END
@@ -269,6 +272,11 @@ def prepare_github_repositories():
             removed_target_html.append(re.sub(r'\w?html\w?', '', row))
         html_only_df.cleaned_readme_contents = removed_target_html
         prepared_github_df = pd.concat([python_only_df, html_only_df], axis=0)
+        
+        # remove rows with null readmes (6 html repos)
+        prepared_github_df = prepared_github_df[prepared_github_df.\
+                                                cleaned_readme_contents.isna() == False]
+        
         return prepared_github_df
 
 # =======================================================================================================
@@ -300,4 +308,64 @@ def wrangle_github_repositories():
 
 # =======================================================================================================
 # wrangle_github_repositories END
+# wrangle_github_repositories TO post_explore_wrangle_github_repositories
+# post_explore_wrangle_github_repositories
+# =======================================================================================================
+
+def post_explore_wrangle_github_repositories():
+    '''
+    From the wrangled 'repo.csv' data, additional preparation is applied in lieu of findings during
+    the exploratory phase and returns a new dataframe that reflects the changes made during exploration
+
+    INPUT:
+    NONE
+
+    OUTPUT:
+    post_explore_version = Pandas dataframe of findings from explore phase
+    '''
+    old_github_df = wrangle_github_repositories()
+    old_github_df = old_github_df[~old_github_df.repo.str.startswith('pemistahl')]
+    srchttps_text = []
+    for text in old_github_df.cleaned_readme_contents.astype(str):
+        regexp = r'srchttps\w+'
+        srchttps_text.append(re.sub(regexp, 'srchttps_link', text))
+    old_github_df.cleaned_readme_contents = srchttps_text
+    weird_text = []
+    for text in old_github_df.cleaned_readme_contents.astype(str):
+        regexp = r'&#9;'
+        weird_text.append(re.sub(regexp, '', text))
+    old_github_df.cleaned_readme_contents = weird_text
+    post_explore_version = old_github_df
+    return post_explore_version
+
+# =======================================================================================================
+# post_explore_wrangle_github_repositories END
+# post_explore_wrangle_github_repositories TO split
+# train_split START
+# =======================================================================================================
+
+def train_split(df):
+    '''
+    Takes in a dataframe and splits the data into train, validate, and test sets with 70%, 20%, 10% of data.
+
+    INPUT:
+    df = Pandas dataframe to be splitted
+
+    OUTPUT:
+    train = Pandas dataframe with 70% of original data
+    validate = Pandas dataframe with 20% of original data
+    test = Pandas dataframe with 10% of original data
+    '''
+    train_validate, test = train_test_split(df,
+                                    random_state=1349,
+                                    train_size=0.9,
+                                    stratify=df.language)
+    train, validate = train_test_split(train_validate,
+                                random_state=1349,
+                                train_size=0.778,
+                                stratify=train_validate.language)
+    return train, validate, test
+    
+# =======================================================================================================
+# train_split END
 # =======================================================================================================
