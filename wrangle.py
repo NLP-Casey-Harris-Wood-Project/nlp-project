@@ -15,6 +15,7 @@
 10. prepare_github_repositories
 11. wrangle_github_repositories
 12. post_explore_wrangle_github_repositories
+13. train_split
 '''
 
 # =======================================================================================================
@@ -42,6 +43,7 @@ import unicodedata
 import acquire as a
 import os
 from sklearn.model_selection import train_test_split
+
 # =======================================================================================================
 # Imports END
 # Imports TO basic_clean
@@ -310,7 +312,6 @@ def wrangle_github_repositories():
 # post_explore_wrangle_github_repositories
 # =======================================================================================================
 
-<<<<<<< HEAD
 def post_explore_wrangle_github_repositories():
     '''
     From the wrangled 'repo.csv' data, additional preparation is applied in lieu of findings during
@@ -339,17 +340,32 @@ def post_explore_wrangle_github_repositories():
 
 # =======================================================================================================
 # post_explore_wrangle_github_repositories END
+# post_explore_wrangle_github_repositories TO split
+# train_split START
 # =======================================================================================================
-=======
-# split data into train, validate, test
+
 def train_split(df):
+    '''
+    Takes in a dataframe and splits the data into train, validate, and test sets with 70%, 20%, 10% of data.
+
+    INPUT:
+    df = Pandas dataframe to be splitted
+
+    OUTPUT:
+    train = Pandas dataframe with 70% of original data
+    validate = Pandas dataframe with 20% of original data
+    test = Pandas dataframe with 10% of original data
+    '''
     train_validate, test = train_test_split(df,
-                                            random_state=1349,
-                                            train_size=0.8,
-                                           stratify=df.language)
+                                    random_state=1349,
+                                    train_size=0.9,
+                                    stratify=df.language)
     train, validate = train_test_split(train_validate,
-                                       random_state=1349,
-                                       train_size=0.7,
-                                      stratify=train_validate.language)
+                                random_state=1349,
+                                train_size=0.778,
+                                stratify=train_validate.language)
     return train, validate, test
->>>>>>> 4f7f8cc8acc28c6ff387569fdc49a342e694e3a8
+    
+# =======================================================================================================
+# train_split END
+# =======================================================================================================
