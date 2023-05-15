@@ -180,6 +180,7 @@ def visual2():
         'HTML Frequency': top_10_html_frequencies
     }
     df = pd.DataFrame(data)
+    
     df_python_sorted = df.sort_values(by='Python Frequency', ascending=False)
     df_html_sorted = df.sort_values(by='HTML Frequency', ascending=False)
     plt.style.use('ggplot')
