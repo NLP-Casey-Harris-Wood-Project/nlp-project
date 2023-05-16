@@ -44,6 +44,7 @@ from wordcloud import WordCloud
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.probability import FreqDist
+import nltk.sentiment
 import re
 import unicodedata
 import wrangle as w
@@ -284,39 +285,65 @@ def visual2(train, python_text, html_text):
     plt.tight_layout()
     plt.show()
 
+
+    
 # =======================================================================================================
 # visual2 END
 # visual2 TO visual3
 # visual3 START
 # =======================================================================================================
 
-def visual3(train, python_text, html_text):
-    '''
-    Creates wordclouds of most commonly used words across repositories for both Python and HTML
+# def visual3(train, python_text, html_text):
+#     '''
+#     Creates wordclouds of most commonly used words across repositories for both Python and HTML
 
-    INPUT:
-    NONE
+#     INPUT:
+#     NONE
 
-    OUTPUT:
-    visual = Subplot with 2 wordclouds, one for Python, one for HTML
+#     OUTPUT:
+#     visual = Subplot with 2 wordclouds, one for Python, one for HTML
+#     '''
+    
+#     unique_python_words = set(python_text.split())
+#     unigram_python_img = WordCloud(background_color='white').\
+#         generate(' '.join(unique_python_words))
+    
+#     unique_html_words = set(html_text.split())
+#     unigram_html_img = WordCloud(background_color='white').\
+#         generate(' '.join(unique_html_words))
+    
+#     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+#     axs[0].imshow(unigram_python_img)
+#     axs[0].axis('off')
+#     axs[0].set_title('Most Common Python Words')
+#     axs[1].imshow(unigram_html_img)
+#     axs[1].axis('off')
+#     axs[1].set_title('Most Common HTML Words')
+#     plt.tight_layout()
+#     plt.show()
+
+def visual3(train):
     '''
-    
-    unique_python_words = set(python_text.split())
-    unigram_python_img = WordCloud(background_color='white').\
-        generate(' '.join(unique_python_words))
-    
-    unique_html_words = set(html_text.split())
-    unigram_html_img = WordCloud(background_color='white').\
-        generate(' '.join(unique_html_words))
-    
-    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
-    axs[0].imshow(unigram_python_img)
-    axs[0].axis('off')
-    axs[0].set_title('Most Common Python Words')
-    axs[1].imshow(unigram_html_img)
-    axs[1].axis('off')
-    axs[1].set_title('Most Common HTML Words')
-    plt.tight_layout()
+    This will display the mean average sentiment score for python and html repos
+    '''
+    # create sentiment analyzer object
+    sia = nltk.sentiment.SentimentIntensityAnalyzer()
+    # get sentiment scores for every repo in the training dataset
+    train['compound_sentiment'] = train['cleaned_readme_contents'].apply(
+        lambda x: sia.polarity_scores(x)['compound'])
+    # get the average sentiment score for each language
+    sentiments = train.groupby('language')['compound_sentiment'].mean()
+    # display a horizontal bar plot of the avg sentiment scores
+    sentiments.plot.barh()
+    # add title
+    plt.title('Python Has Slightly Higher Average Sentiment Score', size=16)
+    # add axis labels
+    plt.xlabel('Average Sentiment Score', size=16)
+    plt.ylabel('Programming Language', size=16)
+    # resize tick labels
+    plt.xticks(size=14)
+    plt.yticks(size=14)
+    # show plot
     plt.show()
 
 # =======================================================================================================
