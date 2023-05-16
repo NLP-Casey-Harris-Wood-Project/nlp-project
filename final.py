@@ -456,11 +456,12 @@ def stat1(train):
     alpha = 0.05
     observed = pd.crosstab(train.language,
                            train.cleaned_readme_contents.str.contains('srchttps_link'))
-    p = stats.chi2_contingency(observed)[1]
+    chi2, p, _, hypothetical = stats.chi2_contingency(observed)
     
     if p < alpha:
         print('\033[32m========== REJECT THE NULL HYPOTHESIS! ==========\033[0m')
         print(f'\033[35mP-Value:\033[0m {p:.8f}')
+        print(f'\033[35mChi-Squared-Value:\033[0m {chi2:.8f}')
     else:
         print('\033[31m========== ACCEPT THE NULL HYPOTHESIS! ==========\033[0m')
         print(f'\033[35mP-Value:\033[0m {p:.8f}')
