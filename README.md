@@ -1,8 +1,7 @@
 # RepoLingo - 'Do You Read Me?'
 
 <!-- ![Project Banner](path/to/banner_image.png) -->
-
-*Project banner image credits: [Source Name](image_source_url)*
+<!-- *Project banner image credits: [Source Name](image_source_url)* -->
 
 ## Table of Contents
 
@@ -21,7 +20,7 @@
 
 <b><u><i>Project Description:</i></u></b>
 
-Utilizing Web-Scraping techniques on Github NLP repository's README that have the majority of the code as Python or HTML, create a classification model that accurately predicts the predominant coding language used within each repository.  This is important to see if there is any pattern of vocabulary usage that tends to dictate the predominant coding language.
+Utilizing Web-Scraping techniques on Github NLP repository's README that have the majority of the code as Python or HTML, we will create a classification model that accurately predicts the predominant coding language used within each repository. This is important to see if there is any pattern of vocabulary usage that tends to dictate the predominant coding language.
 
 <!-- - Briefly describe the project goal, dataset, and problem statement. -->
 
@@ -38,10 +37,10 @@ Since HTML and Python utilizes unique syntaxes and code, then there should be un
 
 <b><u><i>Initial Questions:</i></u></b>
 
-1. Is there unique terminology used for Python and HTML?
-2. Are there words that are used more in Python than HTML and vice versa?
+1. Is there unique terminology used more frequently for Python and HTML?
+2. Does one programming language have a higher sentiment score on average than the other?
 3. Are there 2-word combinations that are used more in Python than HTML and vice versa?
-4. Does http occur more in Python or in HTML?
+4. Do hyperlinks (text begining with 'http') occur more frequently in Python or in HTML readmes?
 
 ## Dataset
 
@@ -49,7 +48,7 @@ Since HTML and Python utilizes unique syntaxes and code, then there should be un
 
 <b><u><i>Description:</i></u></b>
 
-Web-scraped data from 500 NLP related Github repositories that contain the README contents and predominant code language (Python or HTML) for each repository.  The target variable is the predominant coding language of each repository (Python or HTML).
+Web-scraped data of the README contents from 500 NLP related Github repositories and a variable describing the predominant code language (Python or HTML) used for each repository. The target variable is the predominant coding language of each repository (Python or HTML).
 
 <!-- - Include a link to the dataset source, if available.
 - Data dictionary -->
@@ -143,8 +142,8 @@ Nothing of significance
 
 - DecisionTreeClassifier()
 - RandomForestClassifier()
+- K-Nearest-Neighbors
 - LogisticRegression()
-- MultinomialNB()
 
 <!-- - Describe the model training process, including hyperparameter tuning and cross-validation, if applicable. -->
 
@@ -161,19 +160,18 @@ Nothing of significance
 - Since we do not necessarily care for specifically Python or HTML predictions, but rather the overall accuracy of the model, we will evaluate models on their accuracy scores
 
 <!-- ![Model Performance Comparison](path/to/model_performance_image.png) -->
-
-*Image caption: A comparison of the performance of different models on the dataset.*
+<!-- *Image caption: A comparison of the performance of different models on the dataset.* -->
 
 ## Results
 
-- Summarize the project results, including the best-performing model, its performance metrics, and any insights derived from the analysis.
+- Our best model was a Decision Tree model with an accuracy of 80% on our test dataset, which is 20% higher than our baseline model.
 
 ## Future Work
 
-- Discuss potential improvements, additional features, or alternative approaches for the project.
+- If given more time we would filter out more html tags from the readme text as a part of the preparation steps
+- We would also try rerunning our exploration of the data using an even number of Python and HTML repositories to see if there would be any difference in findings
 
 ## Acknowledgements
 
-- List any references, articles, or resources used during the project.
-- Acknowledge any collaborators or external support, if applicable.
-
+- The readme files used for this project were gathered from https://github.com/topics/nlp. Use of readmes in this project does not imply ownership of any of the repository information used.
+- This project was created by Rob Casey, Adam Harris and Jared Wood as a part of the Codeup curriculum.

@@ -137,7 +137,7 @@ def get_model_tree_cv_1gram_4depth(X_train, X_validate, y_train, y_validate):
 
 # ====================================================================
 
-def get_model_test_tfifd_1(X_train, y_train, X_test, y_test, model, vectorizer):
+def get_model_test_tfifd_1(X_test, y_test, model, vectorizer):
     '''
     This will use the passed classification model and vectorizer on the test dataset
     '''
