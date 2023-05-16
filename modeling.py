@@ -16,6 +16,29 @@ warnings.filterwarnings("ignore")
 
 # ====================================================================
 
+def get_model_baseline(train, validate):
+    '''
+    This will display the metrics for the baseline model using the mode of the dataset
+    '''
+    # get the mode of the training dataset
+    accuracy = train.language.value_counts(normalize=True)[0]
+    # get the mode of the validation dataset
+    acc_validate = validate.language.value_counts(normalize=True)[0]
+    # create a dataframe to store the metrics
+    metric_df = pd.DataFrame(data=[
+        {
+            # add the model metrics to the metrics_df
+            'model' : 'baseline',
+            'accuracy' : accuracy,
+            'acc-validate' : acc_validate,
+            'difference' : acc_validate - accuracy,
+        }
+    ])
+    # return the baseline metrics
+    return metric_df
+
+# ====================================================================
+
 def get_model_tree_tfidf_1gram_4depth(X_train, X_validate, y_train, y_validate):
     '''
     This will display metrics for a Descistion Tree classifier model using TfidfVectorizer
@@ -82,7 +105,7 @@ def get_model_tree_tfidf_1gram_6depth(X_train, X_validate, y_train, y_validate):
 
 # ====================================================================
 
-def get_model__tree_cv_1gram_4depth(X_train, X_validate, y_train, y_validate):
+def get_model_tree_cv_1gram_4depth(X_train, X_validate, y_train, y_validate):
     '''
     This will display metrics for a Descistion Tree classifier model using CountVectorizer
     with unigrams, and a max depth of 4.

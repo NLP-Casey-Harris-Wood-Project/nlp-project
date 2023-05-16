@@ -191,7 +191,9 @@ def full_clean(entry, stem_method=False, extra_removal_words=[], keep_words=[]):
         stemmed_or_lemmatized = stem(tokenized)
     else:
         stemmed_or_lemmatized = lemmatize(tokenized)
-    removed_stopwords = remove_stopwords(stemmed_or_lemmatized, extra_removal_words=extra_removal_words, keep_words=keep_words)
+    removed_stopwords = remove_stopwords(stemmed_or_lemmatized,
+                                         extra_removal_words=extra_removal_words,
+                                         keep_words=keep_words)
     full_cleaned_data = removed_stopwords
     return full_cleaned_data
 
@@ -239,38 +241,52 @@ def prepare_github_repositories():
             vanilla_df = vanilla_df[vanilla_df.readme_contents.isna() == False]
             vanilla_df.reset_index(inplace=True)
             vanilla_df.drop(columns='index', inplace=True)
+            
         html_only_df = vanilla_df[vanilla_df.language == 'HTML']
         python_only_df = vanilla_df[vanilla_df.language == 'Python']
-        python_only_df['cleaned_readme_contents'] = full_clean(python_only_df.readme_contents, extra_removal_words=['python'])
-        html_only_df['cleaned_readme_contents'] = full_clean(html_only_df.readme_contents, extra_removal_words=['html'])
+        
+        python_only_df['cleaned_readme_contents'] = full_clean(python_only_df.readme_contents,
+                                                               extra_removal_words=['python'])
+        html_only_df['cleaned_readme_contents'] = full_clean(html_only_df.readme_contents,
+                                                             extra_removal_words=['html'])
         removed_target_python = []
         for row in python_only_df.cleaned_readme_contents:
             removed_target_python.append(re.sub(r'\w?python\w?', '', row))
+            
         python_only_df.cleaned_readme_contents = removed_target_python
+        
         removed_target_html = []
         for row in html_only_df.cleaned_readme_contents:
             removed_target_html.append(re.sub(r'\w?html\w?', '', row))
         html_only_df.cleaned_readme_contents = removed_target_html
         prepared_github_df = pd.concat([python_only_df, html_only_df], axis=0)
         return prepared_github_df
+    
     else:
         vanilla_df = acquire_github_repositories()
         if vanilla_df.readme_contents.isna().sum() > 1:
             vanilla_df = vanilla_df[vanilla_df.readme_contents.isna() == False]
             vanilla_df.reset_index(inplace=True)
             vanilla_df.drop(columns='index', inplace=True)
+            
         html_only_df = vanilla_df[vanilla_df.language == 'HTML']
         python_only_df = vanilla_df[vanilla_df.language == 'Python']
-        python_only_df['cleaned_readme_contents'] = full_clean(python_only_df.readme_contents, extra_removal_words=['python'])
-        html_only_df['cleaned_readme_contents'] = full_clean(html_only_df.readme_contents, extra_removal_words=['html'])
+        
+        python_only_df['cleaned_readme_contents']\
+            = full_clean(python_only_df.readme_contents, extra_removal_words=['python'])
+        html_only_df['cleaned_readme_contents']\
+            = full_clean(html_only_df.readme_contents, extra_removal_words=['html'])
+        
         removed_target_python = []
         for row in python_only_df.cleaned_readme_contents:
             removed_target_python.append(re.sub(r'\w?python\w?', '', row))
         python_only_df.cleaned_readme_contents = removed_target_python
+        
         removed_target_html = []
         for row in html_only_df.cleaned_readme_contents:
             removed_target_html.append(re.sub(r'\w?html\w?', '', row))
         html_only_df.cleaned_readme_contents = removed_target_html
+        
         prepared_github_df = pd.concat([python_only_df, html_only_df], axis=0)
         
         # remove rows with null readmes (6 html repos)
@@ -365,7 +381,6 @@ def train_split(df):
                                 train_size=0.778,
                                 stratify=train_validate.language)
     return train, validate, test
-    
 # =======================================================================================================
 # train_split END
 # =======================================================================================================

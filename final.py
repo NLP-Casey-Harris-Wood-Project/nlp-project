@@ -73,8 +73,8 @@ def vanilla():
     OUTPUT:
     vanilla.shape
     '''
-    vanilla = pd.read_csv('repo.csv')
-    return vanilla.shape
+    # read in the raw data from the local csv
+    return pd.read_csv('repo.csv', index_col=0)
 
 # =======================================================================================================
 # vanilla END
@@ -92,16 +92,56 @@ def prepare():
     OUTPUT:
     repo_df = Fully prepared pandas dataframe
     '''
-    repo_df = w.post_explore_wrangle_github_repositories()
-    return repo_df
+    # acquire and prep the dataset
+    return w.post_explore_wrangle_github_repositories()
 
 # =======================================================================================================
 # prepare END
-# prepare TO visual1
+# prepare TO train_split
+# train_split START
+# =======================================================================================================
+
+def train_split(df):
+    '''
+    Takes in a dataframe and splits the data into train, validate, and test sets with 70%, 20%, 10% of data.
+
+    INPUT:
+    df = Pandas dataframe to be splitted
+
+    OUTPUT:
+    train = Pandas dataframe with 70% of original data
+    validate = Pandas dataframe with 20% of original data
+    test = Pandas dataframe with 10% of original data
+    '''
+    # get split off the test data
+    train_validate, test = train_test_split(df,
+                                            # set the random seed
+                                            random_state=1349,
+                                            # set the test dataset size
+                                            train_size=0.9,
+                                            # we want an even amount of python and html 
+                                            # pages in each group
+                                            stratify=df.language)
+    # get the train and validate datasets
+    train, validate = train_test_split(train_validate,
+                                       # set the random seed
+                                       random_state=1349,
+                                       # set the training dataset size
+                                       train_size=0.778,
+                                       # we want an even amount of python and html 
+                                       # pages in each group
+                                       stratify=train_validate.language)
+    # return the train, validate and test datasets
+    return train, validate, test
+
+# =======================================================================================================
+# train_split END
+# train_split TO visual1
 # visual1 START
 # =======================================================================================================
 
-def visual1():
+
+def visual1(before_df, after_df):
     '''
     Shows the distribution of 'srchttps' per repository as a subplot with 2 visuals that demonstrate
     the distribution before the outlier removal and one after the outlier removal
@@ -113,22 +153,26 @@ def visual1():
     visual = Subplot with 2 distribution plots, one before outlier removal, one after outlier removal
     '''
     # Assuming you have a DataFrame named 'repos_df' that contains repository information
-    before_df = w.wrangle_github_repositories()
     python_df = before_df[before_df['language'] == 'Python']
+    
     matched_repos = python_df[python_df['cleaned_readme_contents'].str.contains("srchttps")]
     matched_repos['frequency'] = matched_repos['cleaned_readme_contents'].str.count("srchttps")
+    
     sorted_repos = matched_repos.sort_values('frequency', ascending=False)
     repo_freq_list = sorted_repos[['repo', 'frequency']].values.tolist()
     repos = [repo for repo, freq in repo_freq_list]
     frequencies = [freq for repo, freq in repo_freq_list]
-    after_df = w.post_explore_wrangle_github_repositories()
+    
     python_df_after = after_df[after_df['language'] == 'Python']
-    matched_repos_after = python_df_after[python_df_after['cleaned_readme_contents'].str.contains("srchttps")]
-    matched_repos_after['frequency'] = matched_repos_after['cleaned_readme_contents'].str.count("srchttps")
+    matched_repos_after = python_df_after[python_df_after['cleaned_readme_contents'].\
+                                          str.contains("srchttps")]
+    matched_repos_after['frequency'] = matched_repos_after['cleaned_readme_contents'].\
+                                        str.count("srchttps")
     sorted_repos_after = matched_repos_after.sort_values('frequency', ascending=False)
     repo_freq_list_after = sorted_repos_after[['repo', 'frequency']].values.tolist()
     repos_after = [repo for repo, freq in repo_freq_list_after]
     frequencies_after = [freq for repo, freq in repo_freq_list_after]
+    
     plt.style.use('ggplot')
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     axs[0].barh(repos, frequencies)
@@ -150,7 +194,7 @@ def visual1():
 # visual2 START
 # =======================================================================================================
 
-def visual2():
+def visual2(train):
     '''
     Gets the distribution of unique words for both Python and HTML repositories
 
@@ -160,10 +204,9 @@ def visual2():
     OUTPUT:
     visual = Subplot with 2 distribution visuals of unique words, one for Python, one for HTML
     '''
-    repo_df = w.post_explore_wrangle_github_repositories()
-    train, validate, test = w.train_split(repo_df)
     python_df = train[train['language'] == 'Python']
     html_df = train[train['language'] == 'HTML']
+    
     python_text = ' '.join(python_df['cleaned_readme_contents'])
     python_text = python_text.lower()
     python_tokens = word_tokenize(python_text)
@@ -171,12 +214,15 @@ def visual2():
     html_text = ' '.join(html_df['cleaned_readme_contents'])
     html_text = html_text.lower()
     html_tokens = word_tokenize(html_text)
+    
     html_freqdist = FreqDist(html_tokens)
-    python_word_freq = [(word, freq) for word, freq in python_freqdist.items() if word not in html_freqdist.keys()]
+    python_word_freq = [(word, freq) for word, freq in python_freqdist.items() 
+                        if word not in html_freqdist.keys()]
     sorted_python_word_freq = sorted(python_word_freq, key=lambda x: x[1], reverse=True)
     top_10_python_words = [pair[0] for pair in sorted_python_word_freq][:10]
     top_10_python_frequencies = [pair[1] for pair in sorted_python_word_freq][:10]
-    html_word_freq = [(word, freq) for word, freq in html_freqdist.items() if word not in python_freqdist.keys()]
+    html_word_freq = [(word, freq) for word, freq in 
+                      html_freqdist.items() if word not in python_freqdist.keys()]
     sorted_html_word_freq = sorted(html_word_freq, key=lambda x: x[1], reverse=True)
     top_10_html_words = [pair[0] for pair in sorted_html_word_freq][:10]
     top_10_html_frequencies = [pair[1] for pair in sorted_html_word_freq][:10]
@@ -190,6 +236,7 @@ def visual2():
     
     df_python_sorted = df.sort_values(by='Python Frequency', ascending=False)
     df_html_sorted = df.sort_values(by='HTML Frequency', ascending=False)
+    
     plt.style.use('ggplot')
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 8))
     axes[0].barh(df_python_sorted['Python Word'], df_python_sorted['Python Frequency'], color='tab:blue')
@@ -209,7 +256,7 @@ def visual2():
 # visual3 START
 # =======================================================================================================
 
-def visual3():
+def visual3(train):
     '''
     Creates wordclouds of most commonly used words across repositories for both Python and HTML
 
@@ -219,14 +266,16 @@ def visual3():
     OUTPUT:
     visual = Subplot with 2 wordclouds, one for Python, one for HTML
     '''
-    repo_df = w.post_explore_wrangle_github_repositories()
-    train, validate, test = w.train_split(repo_df)
-    python_words = ' '.join(train[train.language == 'Python']['cleaned_readme_contents'].astype(str))
-    html_words = ' '.join(train[train.language == 'HTML']['cleaned_readme_contents'].astype(str))
+    python_words = ' '.join(train[train.language == 'Python'
+                                 ]['cleaned_readme_contents'].astype(str))
+    html_words = ' '.join(train[train.language == 'HTML'
+                               ]['cleaned_readme_contents'].astype(str))
+    
     unique_python_words = set(python_words.split())
     unigram_python_img = WordCloud(background_color='white').generate(' '.join(unique_python_words))
     unique_html_words = set(html_words.split())
     unigram_html_img = WordCloud(background_color='white').generate(' '.join(unique_html_words))
+    
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     axs[0].imshow(unigram_python_img)
     axs[0].axis('off')
@@ -243,7 +292,7 @@ def visual3():
 # visual4 START
 # =======================================================================================================
 
-def visual4():
+def visual4(train):
     '''
     Returns a subplot of the distribution of bigrams for both Python and HTML repositories
 
@@ -253,24 +302,31 @@ def visual4():
     OUTPUT:
     visual = Subplot with 2 distribution visuals, one for Python, one for HTML
     '''
-    repo_df = w.post_explore_wrangle_github_repositories()
-    train, validate, test = w.train_split(repo_df)
     python_df = train[train['language'] == 'Python']
     html_df = train[train['language'] == 'HTML']
     python_text = ' '.join(python_df['cleaned_readme_contents'])
     html_text = ' '.join(html_df['cleaned_readme_contents'])
+    
     python_bigrams = list(nltk.bigrams(nltk.word_tokenize(python_text)))
     html_bigrams = list(nltk.bigrams(nltk.word_tokenize(html_text)))
     python_bigram_freqdist = FreqDist(python_bigrams)
     html_bigram_freqdist = FreqDist(html_bigrams)
+    
     python_unique_bigrams = set(python_bigram_freqdist.keys()) - set(html_bigram_freqdist.keys())
     html_unique_bigrams = set(html_bigram_freqdist.keys()) - set(python_bigram_freqdist.keys())
-    sorted_python_bigrams = sorted(python_unique_bigrams, key=lambda x: python_bigram_freqdist[x], reverse=True)
-    sorted_html_bigrams = sorted(html_unique_bigrams, key=lambda x: html_bigram_freqdist[x], reverse=True)
+    
+    sorted_python_bigrams = sorted(python_unique_bigrams, key=lambda x: 
+                                   python_bigram_freqdist[x], reverse=True)
+    sorted_html_bigrams = sorted(html_unique_bigrams, key=lambda x: 
+                                 html_bigram_freqdist[x], reverse=True)
+    
     top_10_python_bigrams = sorted_python_bigrams[:10]
-    python_bigram_frequencies = [python_bigram_freqdist[bigram] for bigram in top_10_python_bigrams]
+    python_bigram_frequencies = [python_bigram_freqdist[bigram] for 
+                                 bigram in top_10_python_bigrams]
     top_10_html_bigrams = sorted_html_bigrams[:10]
-    html_bigram_frequencies = [html_bigram_freqdist[bigram] for bigram in top_10_html_bigrams]
+    html_bigram_frequencies = [html_bigram_freqdist[bigram] for 
+                               bigram in top_10_html_bigrams]
+    
     plt.figure(figsize=(10, 6))
     plt.barh(range(10), python_bigram_frequencies, align='center')
     plt.yticks(range(10), top_10_python_bigrams)
@@ -292,7 +348,7 @@ def visual4():
 # visual5 START
 # =======================================================================================================
 
-def visual5():
+def visual5(train):
     '''
     Shows the distribution of repositories that have at least one http word in them for both Python
     and HTML repositories as a ratio of total Python or HTML repositories
@@ -303,12 +359,16 @@ def visual5():
     OUTPUT:
     visual = Distribution of repositories with http words
     '''
-    repo_df = w.post_explore_wrangle_github_repositories()
-    train, validate, test = w.train_split(repo_df)
-    python_http_ratio = train[train.language == 'Python'].cleaned_readme_contents.str.contains('srchttps_link').sum() / train[train.language == 'Python'].shape[0]
-    html_http_ratio = train[train.language == 'HTML'].cleaned_readme_contents.str.contains('srchttps_link').sum() / train[train.language == 'HTML'].shape[0]
+    python_http_ratio = train[train.language == 'Python'].\
+        cleaned_readme_contents.str.contains('srchttps_link').sum() / train[
+        train.language == 'Python'].shape[0]
+    html_http_ratio = train[train.language == 'HTML'].\
+        cleaned_readme_contents.str.contains('srchttps_link').sum() / train[
+        train.language == 'HTML'].shape[0]
+    
     ratios = [python_http_ratio, html_http_ratio]
     labels = ['Python Repo w/ http Link', 'HTML Repo w/ http Link']
+    
     plt.bar(labels, ratios)
     plt.ylabel('Ratio')
     plt.title('Ratio of http Links of Python Vs. HTML')
@@ -320,7 +380,7 @@ def visual5():
 # stat1 START
 # =======================================================================================================
 
-def stat1():
+def stat1(train):
     '''
     Returns the statistical test to the visual5 function via the chi2_contingency statistical test
     by comparing the repository language and whether or not the repository had a srchttps_link
@@ -332,11 +392,11 @@ def stat1():
     OUTPUT:
     Stat = Accept/reject null hypothesis with the p-value
     '''
-    repo_df = w.post_explore_wrangle_github_repositories()
-    train, validate, test = w.train_split(repo_df)
     alpha = 0.05
-    observed = pd.crosstab(train.language, train.cleaned_readme_contents.str.contains('srchttps_link'))
+    observed = pd.crosstab(train.language,
+                           train.cleaned_readme_contents.str.contains('srchttps_link'))
     p = stats.chi2_contingency(observed)[1]
+    
     if p < alpha:
         print('\033[32m========== REJECT THE NULL HYPOTHESIS! ==========\033[0m')
         print(f'\033[35mP-Value:\033[0m {p:.8f}')
@@ -350,36 +410,25 @@ def stat1():
 # baseline START
 # =======================================================================================================
 
-def baseline():
+def get_model_baseline(train, validate):
     '''
-    Demonstrates the baseline model for the modeling process in order to evaluate the performance
-    of future created models
-
-    INPUT:
-    NONE
-
-    OUTPUT:
-    metric_df = Elaboration of ONLY the baseline model performance
+    This will display the metrics for the baseline model using the mode of the dataset
     '''
-    repo_df = w.post_explore_wrangle_github_repositories()
-    train, validate, test = w.train_split(repo_df)
-    X_train = train.cleaned_readme_contents
-    y_train = train.language
-    X_validate = validate.cleaned_readme_contents
-    y_validate = validate.language
-    X_test = test.cleaned_readme_contents
-    y_test = test.language
-    train.language.value_counts(normalize=True)[0]
+    # get the mode of the training dataset
     accuracy = train.language.value_counts(normalize=True)[0]
+    # get the mode of the validation dataset
     acc_validate = validate.language.value_counts(normalize=True)[0]
+    # create a dataframe to store the metrics
     metric_df = pd.DataFrame(data=[
         {
+            # add the model metrics to the metrics_df
             'model' : 'baseline',
             'accuracy' : accuracy,
             'acc-validate' : acc_validate,
             'difference' : acc_validate - accuracy,
         }
     ])
+    # return the baseline metrics
     return metric_df
 
 # =======================================================================================================
@@ -401,12 +450,14 @@ def models():
     '''
     repo_df = w.post_explore_wrangle_github_repositories()
     train, validate, test = w.train_split(repo_df)
+    
     X_train = train.cleaned_readme_contents
     y_train = train.language
     X_validate = validate.cleaned_readme_contents
     y_validate = validate.language
     X_test = test.cleaned_readme_contents
     y_test = test.language
+    
     train.language.value_counts(normalize=True)[0]
     accuracy = train.language.value_counts(normalize=True)[0]
     acc_validate = validate.language.value_counts(normalize=True)[0]
