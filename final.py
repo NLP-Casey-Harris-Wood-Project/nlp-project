@@ -103,7 +103,8 @@ def prepare():
 
 def train_split(df):
     '''
-    Takes in a dataframe and splits the data into train, validate, and test sets with 70%, 20%, 10% of data.
+    Takes in a dataframe and splits the data into train, validate, 
+    and test sets with 70%, 20%, 10% of data.
 
     INPUT:
     df = Pandas dataframe to be splitted
@@ -136,21 +137,42 @@ def train_split(df):
 
 # =======================================================================================================
 # train_split END
-# train_split TO visual1
+# train_split TO get_words
+# get_words START
+# =======================================================================================================
+
+def get_words(train):
+    '''
+    This will split the training dataset into groups containing text from the python
+    and html language groups
+    '''
+    # get the words from the python language repos
+    python_text = ' '.join(train[train.language == 'Python'
+                                 ]['cleaned_readme_contents'].astype(str))
+    # get the words from the html language repos
+    html_text = ' '.join(train[train.language == 'HTML'
+                               ]['cleaned_readme_contents'].astype(str))
+    # return the two language groups
+    return python_text, html_text
+
+# =======================================================================================================
+# get_words END
+# get_words TO visual1
 # visual1 START
 # =======================================================================================================
 
-
 def visual1(before_df, after_df):
     '''
-    Shows the distribution of 'srchttps' per repository as a subplot with 2 visuals that demonstrate
-    the distribution before the outlier removal and one after the outlier removal
+    Shows the distribution of 'srchttps' per repository as a subplot 
+    with 2 visuals that demonstrate the distribution before the outlier 
+    removal and one after the outlier removal
 
     INPUT:
     NONE
 
     OUTPUT:
-    visual = Subplot with 2 distribution plots, one before outlier removal, one after outlier removal
+    visual = Subplot with 2 distribution plots, one before outlier removal, 
+    one after outlier removal
     '''
     # Assuming you have a DataFrame named 'repos_df' that contains repository information
     python_df = before_df[before_df['language'] == 'Python']
@@ -168,12 +190,15 @@ def visual1(before_df, after_df):
                                           str.contains("srchttps")]
     matched_repos_after['frequency'] = matched_repos_after['cleaned_readme_contents'].\
                                         str.count("srchttps")
+    
     sorted_repos_after = matched_repos_after.sort_values('frequency', ascending=False)
     repo_freq_list_after = sorted_repos_after[['repo', 'frequency']].values.tolist()
     repos_after = [repo for repo, freq in repo_freq_list_after]
     frequencies_after = [freq for repo, freq in repo_freq_list_after]
     
+    # create visualization
     plt.style.use('ggplot')
+    # create subplots
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     axs[0].barh(repos, frequencies)
     axs[0].set_xlabel('Frequency')
@@ -194,7 +219,7 @@ def visual1(before_df, after_df):
 # visual2 START
 # =======================================================================================================
 
-def visual2(train):
+def visual2(train, python_text, html_text):
     '''
     Gets the distribution of unique words for both Python and HTML repositories
 
@@ -204,18 +229,21 @@ def visual2(train):
     OUTPUT:
     visual = Subplot with 2 distribution visuals of unique words, one for Python, one for HTML
     '''
-    python_df = train[train['language'] == 'Python']
-    html_df = train[train['language'] == 'HTML']
+#     python_df = train[train['language'] == 'Python']
+#     html_df = train[train['language'] == 'HTML']
     
-    python_text = ' '.join(python_df['cleaned_readme_contents'])
-    python_text = python_text.lower()
+#     python_text = ' '.join(python_df['cleaned_readme_contents'])
+#     python_text = python_text.lower()
     python_tokens = word_tokenize(python_text)
+    
     python_freqdist = FreqDist(python_tokens)
-    html_text = ' '.join(html_df['cleaned_readme_contents'])
-    html_text = html_text.lower()
+    
+#     html_text = ' '.join(html_df['cleaned_readme_contents'])
+#     html_text = html_text.lower()
     html_tokens = word_tokenize(html_text)
     
     html_freqdist = FreqDist(html_tokens)
+    
     python_word_freq = [(word, freq) for word, freq in python_freqdist.items() 
                         if word not in html_freqdist.keys()]
     sorted_python_word_freq = sorted(python_word_freq, key=lambda x: x[1], reverse=True)
@@ -223,9 +251,11 @@ def visual2(train):
     top_10_python_frequencies = [pair[1] for pair in sorted_python_word_freq][:10]
     html_word_freq = [(word, freq) for word, freq in 
                       html_freqdist.items() if word not in python_freqdist.keys()]
+    
     sorted_html_word_freq = sorted(html_word_freq, key=lambda x: x[1], reverse=True)
     top_10_html_words = [pair[0] for pair in sorted_html_word_freq][:10]
     top_10_html_frequencies = [pair[1] for pair in sorted_html_word_freq][:10]
+    
     data = {
         'Python Word': top_10_python_words,
         'Python Frequency': top_10_python_frequencies,
@@ -239,11 +269,15 @@ def visual2(train):
     
     plt.style.use('ggplot')
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 8))
-    axes[0].barh(df_python_sorted['Python Word'], df_python_sorted['Python Frequency'], color='tab:blue')
+    axes[0].barh(df_python_sorted['Python Word'],\
+                 df_python_sorted['Python Frequency'],\
+                 color='tab:blue')
     axes[0].set_title('Top 10 Unique Words: Python')
     axes[0].set_xlabel('Frequency')
     axes[0].set_ylabel('Words')
-    axes[1].barh(df_html_sorted['HTML Word'], df_html_sorted['HTML Frequency'], color='tab:orange')
+    axes[1].barh(df_html_sorted['HTML Word'],\
+                 df_html_sorted['HTML Frequency'],\
+                 color='tab:orange')
     axes[1].set_title('Top 10 Unique Words: HTML')
     axes[1].set_xlabel('Frequency')
     axes[1].set_ylabel('Words')
@@ -256,7 +290,7 @@ def visual2(train):
 # visual3 START
 # =======================================================================================================
 
-def visual3(train):
+def visual3(train, python_text, html_text):
     '''
     Creates wordclouds of most commonly used words across repositories for both Python and HTML
 
@@ -266,15 +300,14 @@ def visual3(train):
     OUTPUT:
     visual = Subplot with 2 wordclouds, one for Python, one for HTML
     '''
-    python_words = ' '.join(train[train.language == 'Python'
-                                 ]['cleaned_readme_contents'].astype(str))
-    html_words = ' '.join(train[train.language == 'HTML'
-                               ]['cleaned_readme_contents'].astype(str))
     
-    unique_python_words = set(python_words.split())
-    unigram_python_img = WordCloud(background_color='white').generate(' '.join(unique_python_words))
-    unique_html_words = set(html_words.split())
-    unigram_html_img = WordCloud(background_color='white').generate(' '.join(unique_html_words))
+    unique_python_words = set(python_text.split())
+    unigram_python_img = WordCloud(background_color='white').\
+        generate(' '.join(unique_python_words))
+    
+    unique_html_words = set(html_text.split())
+    unigram_html_img = WordCloud(background_color='white').\
+        generate(' '.join(unique_html_words))
     
     fig, axs = plt.subplots(1, 2, figsize=(10, 5))
     axs[0].imshow(unigram_python_img)
@@ -292,7 +325,7 @@ def visual3(train):
 # visual4 START
 # =======================================================================================================
 
-def visual4(train):
+def visual4(train, python_text, html_text):
     '''
     Returns a subplot of the distribution of bigrams for both Python and HTML repositories
 
@@ -302,13 +335,14 @@ def visual4(train):
     OUTPUT:
     visual = Subplot with 2 distribution visuals, one for Python, one for HTML
     '''
-    python_df = train[train['language'] == 'Python']
-    html_df = train[train['language'] == 'HTML']
-    python_text = ' '.join(python_df['cleaned_readme_contents'])
-    html_text = ' '.join(html_df['cleaned_readme_contents'])
+#     python_df = train[train['language'] == 'Python']
+#     html_df = train[train['language'] == 'HTML']
+#     python_text = ' '.join(python_df['cleaned_readme_contents'])
+#     html_text = ' '.join(html_df['cleaned_readme_contents'])
     
     python_bigrams = list(nltk.bigrams(nltk.word_tokenize(python_text)))
     html_bigrams = list(nltk.bigrams(nltk.word_tokenize(html_text)))
+    
     python_bigram_freqdist = FreqDist(python_bigrams)
     html_bigram_freqdist = FreqDist(html_bigrams)
     

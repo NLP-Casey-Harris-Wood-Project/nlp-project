@@ -24,18 +24,17 @@ def get_model_baseline(train, validate):
     accuracy = train.language.value_counts(normalize=True)[0]
     # get the mode of the validation dataset
     acc_validate = validate.language.value_counts(normalize=True)[0]
-    # create a dataframe to store the metrics
-    metric_df = pd.DataFrame(data=[
-        {
-            # add the model metrics to the metrics_df
-            'model' : 'baseline',
-            'accuracy' : accuracy,
-            'acc-validate' : acc_validate,
-            'difference' : acc_validate - accuracy,
-        }
-    ])
+    # display the model metrics
+    # display the model name and perameters
+    print('\033[32mModel : Baseline\033[0m')
+    # display the accuracy on the training data
+    print(f'Train accuracy : {accuracy:.4f}'),
+    # display the accuracy on the validation data
+    print(f'Validation accuracy : {acc_validate:.4f}'),
+    # display the accuracy difference
+    print(f'Difference : {acc_validate - accuracy:.4f}')
     # return the baseline metrics
-    return metric_df
+    return
 
 # ====================================================================
 
@@ -60,13 +59,13 @@ def get_model_tree_tfidf_1gram_4depth(X_train, X_validate, y_train, y_validate):
     acc_validate = tree.score(X_val_bow, y_validate)
     # display the model metrics
     # display the model name and perameters
-    print('Model : Decistion_Tree : TfidfVectorizer : 1gram : 4_max_depth')
+    print('\033[32mModel : Decistion_Tree : TfidfVectorizer : 1gram : 4_max_depth\033[0m')
     # display the accuracy on the training data
-    print(f'Train accuracy : {accuracy}'),
+    print(f'Train accuracy : {accuracy:.4f}'),
     # display the accuracy on the validation data
-    print(f'Validation accuracy : {acc_validate}'),
+    print(f'Validation accuracy : {acc_validate:.4f}'),
     # display the accuracy difference
-    print(f'Difference : {acc_validate - accuracy}')
+    print(f'Difference : {acc_validate - accuracy:.4f}')
     # return the model for potential use on test data
     return tree, tfidf
 
@@ -93,13 +92,13 @@ def get_model_tree_tfidf_1gram_6depth(X_train, X_validate, y_train, y_validate):
     acc_validate = tree.score(X_val_bow, y_validate)
     # display the model metrics
     # display the model name and perameters
-    print('Model : Decistion_Tree : TfidfVectorizer : 1gram : 6_max_depth')
+    print('\033[32mModel : Decistion_Tree : TfidfVectorizer : 1gram : 6_max_depth\033[0m')
     # display the accuracy on the training data
-    print(f'Train accuracy : {accuracy}'),
+    print(f'Train accuracy : {accuracy:.4f}'),
     # display the accuracy on the validation data
-    print(f'Validation accuracy : {acc_validate}'),
+    print(f'Validation accuracy : {acc_validate:.4f}'),
     # display the accuracy difference
-    print(f'Difference : {acc_validate - accuracy}')
+    print(f'Difference : {acc_validate - accuracy:.4f}')
     # return the model for potential use on test data
     return tree, tfidf
 
@@ -126,13 +125,13 @@ def get_model_tree_cv_1gram_4depth(X_train, X_validate, y_train, y_validate):
     acc_validate = tree.score(X_val_bow, y_validate)
     # display the model metrics
     # display the model name and perameters
-    print('Model : Decistion_Tree : CountVectorizer : 1gram : 4_max_depth')
+    print('\033[32mModel : Decistion_Tree : CountVectorizer : 1gram : 4_max_depth\033[0m')
     # display the accuracy on the training data
-    print(f'train accuracy : {accuracy}'),
+    print(f'Train accuracy : {accuracy:.4f}'),
     # display the accuracy on the validation data
-    print(f'validation accuracy : {acc_validate}'),
+    print(f'Validation accuracy : {acc_validate:.4f}'),
     # display the accuracy difference
-    print(f'difference : {acc_validate - accuracy}')
+    print(f'Difference : {acc_validate - accuracy:.4f}')
     # return the model for potential use on test data
     return tree, cv
 
@@ -148,7 +147,7 @@ def get_model_test_tfifd_1(X_train, y_train, X_test, y_test, model, vectorizer):
     acc_test = model.score(X_test_bow, y_test)
     # display the model metrics
     # display the model info
-    print('Test Dataset')
-    print('Model : Decistion_Tree : TfidfVectorizer : 1gram : 4_max_depth')
+    print('\033[32mTest Dataset\033[0m')
+    print('\033[32mModel : Decistion_Tree : TfidfVectorizer : 1gram : 4_max_depth\033[0m')
     # display the model accuracy score
-    print(f'Test accuracy : {acc_test}')
+    print(f'Test accuracy : {acc_test:.4f}')
