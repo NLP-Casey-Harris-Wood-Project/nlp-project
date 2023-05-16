@@ -1,4 +1,4 @@
-# Predicting Python/HTML of Github NLP Repositories
+# RepoLingo - 'Do You Read Me?'
 
 <!-- ![Project Banner](path/to/banner_image.png) -->
 
