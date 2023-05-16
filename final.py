@@ -49,6 +49,13 @@ import unicodedata
 import wrangle as w
 import os
 from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
 
 # =======================================================================================================
 # Imports END
@@ -343,7 +350,37 @@ def stat1():
 # baseline START
 # =======================================================================================================
 
+def baseline():
+    '''
+    Demonstrates the baseline model for the modeling process in order to evaluate the performance
+    of future created models
 
+    INPUT:
+    NONE
+
+    OUTPUT:
+    metric_df = Elaboration of ONLY the baseline model performance
+    '''
+    repo_df = w.post_explore_wrangle_github_repositories()
+    train, validate, test = w.train_split(repo_df)
+    X_train = train.cleaned_readme_contents
+    y_train = train.language
+    X_validate = validate.cleaned_readme_contents
+    y_validate = validate.language
+    X_test = test.cleaned_readme_contents
+    y_test = test.language
+    train.language.value_counts(normalize=True)[0]
+    accuracy = train.language.value_counts(normalize=True)[0]
+    acc_validate = validate.language.value_counts(normalize=True)[0]
+    metric_df = pd.DataFrame(data=[
+        {
+            'model' : 'baseline',
+            'accuracy' : accuracy,
+            'acc-validate' : acc_validate,
+            'difference' : acc_validate - accuracy,
+        }
+    ])
+    return metric_df
 
 # =======================================================================================================
 # baseline END
@@ -351,7 +388,189 @@ def stat1():
 # models START
 # =======================================================================================================
 
+def models():
+    '''
+    Returns a litany of models created for evaluation to acquire the best possible model for progression
+    into the testing phase of model evaluations
 
+    INPUT:
+    NONE
+
+    OUTPUT:
+    metric_df = Elaboration of the top 15 models out of the 96 models created thus far
+    '''
+    repo_df = w.post_explore_wrangle_github_repositories()
+    train, validate, test = w.train_split(repo_df)
+    X_train = train.cleaned_readme_contents
+    y_train = train.language
+    X_validate = validate.cleaned_readme_contents
+    y_validate = validate.language
+    X_test = test.cleaned_readme_contents
+    y_test = test.language
+    train.language.value_counts(normalize=True)[0]
+    accuracy = train.language.value_counts(normalize=True)[0]
+    acc_validate = validate.language.value_counts(normalize=True)[0]
+    metric_df = pd.DataFrame(data=[
+        {
+            'model' : 'baseline',
+            'accuracy' : accuracy,
+            'acc-validate' : acc_validate,
+            'difference' : acc_validate - accuracy,
+        }
+    ])
+    cv = CountVectorizer()
+    X_bow = cv.fit_transform(X_train)
+    tree = DecisionTreeClassifier(max_depth=3)
+    tree.fit(X_bow, y_train)
+    tfidf = TfidfVectorizer()
+    bag_of_words_tfidf = tfidf.fit_transform(X_train)
+    cv = CountVectorizer(ngram_range=(1, 3))
+    bag_of_grams = cv.fit_transform(X_train)
+    tfidf = CountVectorizer(ngram_range=(2, 3))
+    bag_of_grams = tfidf.fit_transform(X_train)
+    for i in range(1,4):
+        for j in range(3,8):
+            cv = CountVectorizer(ngram_range=(i, i))
+            X_bow = cv.fit_transform(X_train)
+            X_val_bow = cv.transform(X_validate)
+            tree = DecisionTreeClassifier(max_depth=j)
+            tree.fit(X_bow, y_train)
+            accuracy = tree.score(X_bow, y_train)
+            acc_validate = tree.score(X_val_bow, y_validate)
+            
+            metric_df = metric_df.append(
+                {
+                    'model' : f'decistion_tree-cv_{i}gram_{j}depth',
+                    'accuracy' : accuracy,
+                    'acc-validate' : acc_validate,
+                    'difference' : acc_validate - accuracy,
+                }, ignore_index=True
+            )
+    for i in range(1,4):
+        for j in range(3,8):
+            cv = CountVectorizer(ngram_range=(i, i))
+            X_bow = cv.fit_transform(X_train)
+            X_val_bow = cv.transform(X_validate)
+            tree = RandomForestClassifier(max_depth=j)
+            tree.fit(X_bow, y_train)
+            accuracy = tree.score(X_bow, y_train)
+            acc_validate = tree.score(X_val_bow, y_validate)
+            
+            metric_df = metric_df.append(
+                {
+                    'model' : f'random_forest-cv_{i}gram_{j}depth',
+                    'accuracy' : accuracy,
+                    'acc-validate' : acc_validate,
+                    'difference' : acc_validate - accuracy,
+                }, ignore_index=True
+            )
+    for i in range(1,4):
+        for j in range(3,8):
+            cv = CountVectorizer(ngram_range=(i, i))
+            X_bow = cv.fit_transform(X_train)
+            X_val_bow = cv.transform(X_validate)
+            model = KNeighborsClassifier(n_neighbors=j)
+            model.fit(X_bow, y_train)
+            accuracy = model.score(X_bow, y_train)
+            acc_validate = model.score(X_val_bow, y_validate)
+            
+            metric_df = metric_df.append(
+                {
+                    'model' : f'k_nearest-cv_{i}gram_{j}neighbors',
+                    'accuracy' : accuracy,
+                    'acc-validate' : acc_validate,
+                    'difference' : acc_validate - accuracy,
+                }, ignore_index=True
+            )
+    for i in range(1,4):
+        cv = CountVectorizer(ngram_range=(i, i))
+        X_bow = cv.fit_transform(X_train)
+        X_val_bow = cv.transform(X_validate)
+        model = LogisticRegression()
+        model.fit(X_bow, y_train)
+        accuracy = model.score(X_bow, y_train)
+        acc_validate = model.score(X_val_bow, y_validate)
+
+        metric_df = metric_df.append(
+            {
+                'model' : f'logistic_regress-cv_{i}gram',
+                'accuracy' : accuracy,
+                'acc-validate' : acc_validate,
+                'difference' : acc_validate - accuracy,
+            }, ignore_index=True
+        )
+    for i in range(1,4):
+        for j in range(3,8):
+            tfidf = TfidfVectorizer(ngram_range=(i, i))
+            X_bow = tfidf.fit_transform(X_train)
+            X_val_bow = tfidf.transform(X_validate)
+            tree = DecisionTreeClassifier(max_depth=j)
+            tree.fit(X_bow, y_train)
+            accuracy = tree.score(X_bow, y_train)
+            acc_validate = tree.score(X_val_bow, y_validate)
+            
+            metric_df = metric_df.append(
+                {
+                    'model' : f'decistion_tree-tfidf_{i}gram_{j}depth',
+                    'accuracy' : accuracy,
+                    'acc-validate' : acc_validate,
+                    'difference' : acc_validate - accuracy,
+                }, ignore_index=True
+            )
+    for i in range(1,4):
+        for j in range(3,8):
+            tfidf = TfidfVectorizer(ngram_range=(i, i))
+            X_bow = tfidf.fit_transform(X_train)
+            X_val_bow = tfidf.transform(X_validate)
+            tree = RandomForestClassifier(max_depth=j)
+            tree.fit(X_bow, y_train)
+            accuracy = tree.score(X_bow, y_train)
+            acc_validate = tree.score(X_val_bow, y_validate)
+            
+            metric_df = metric_df.append(
+                {
+                    'model' : f'random_forest-tfidf_{i}gram_{j}depth',
+                    'accuracy' : accuracy,
+                    'acc-validate' : acc_validate,
+                    'difference' : acc_validate - accuracy,
+                }, ignore_index=True
+            )
+    for i in range(1,4):
+        for j in range(3,8):
+            tfidf = TfidfVectorizer(ngram_range=(i, i))
+            X_bow = tfidf.fit_transform(X_train)
+            X_val_bow = tfidf.transform(X_validate)
+            model = KNeighborsClassifier(n_neighbors=j)
+            model.fit(X_bow, y_train)
+            accuracy = model.score(X_bow, y_train)
+            acc_validate = model.score(X_val_bow, y_validate)
+            
+            metric_df = metric_df.append(
+                {
+                    'model' : f'k_nearest-tfidf_{i}gram_{j}neighbors',
+                    'accuracy' : accuracy,
+                    'acc-validate' : acc_validate,
+                    'difference' : acc_validate - accuracy,
+                }, ignore_index=True
+            )
+    for i in range(1,4):
+        tfidf = TfidfVectorizer(ngram_range=(i, i))
+        X_bow = tfidf.fit_transform(X_train)
+        X_val_bow = tfidf.transform(X_validate)
+        model = LogisticRegression()
+        model.fit(X_bow, y_train)
+        accuracy = model.score(X_bow, y_train)
+        acc_validate = model.score(X_val_bow, y_validate)
+
+        metric_df = metric_df.append(
+            {
+                'model' : f'logistic_regress-tfidf_{i}gram',
+                'accuracy' : accuracy,
+                'acc-validate' : acc_validate,
+                'difference' : acc_validate - accuracy,
+            }, ignore_index=True
+        )
+    return metric_df.sort_values('acc-validate', ascending=False).head(15)
 
 # =======================================================================================================
 # models END
@@ -359,7 +578,17 @@ def stat1():
 # topmodel START
 # =======================================================================================================
 
+def topmodel():
+    '''
+    Demonstates the best model established from evaluating all models created and shows the scores
+    during the testing phase of modeling
 
+    INPUT:
+    NONE
+
+    OUTPUT:
+    topmodel = Elaboration of the best model performance on the testing dataset (Unseen data)
+    '''
 
 # =======================================================================================================
 # topmodel END
