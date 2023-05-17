@@ -301,20 +301,27 @@ def visual2(train, python_text, html_text):
     plt.style.use('ggplot')
     # create subplots
     fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(10, 8))
-    
+    # create horizontal bar graph of the top 10 python words and their frequencies
     axes[0].barh(df_python_sorted['Python Word'],\
                  df_python_sorted['Python Frequency'],\
                  color='tab:blue')
+    # add figure title
     axes[0].set_title('Top 10 Unique Words: Python')
+    # add axis labels
     axes[0].set_xlabel('Frequency')
     axes[0].set_ylabel('Words')
+    # create horizontal bar graph of the top 10 html words and their frequencies
     axes[1].barh(df_html_sorted['HTML Word'],\
                  df_html_sorted['HTML Frequency'],\
                  color='tab:orange')
+    # add figure title
     axes[1].set_title('Top 10 Unique Words: HTML')
+    # add axis labels
     axes[1].set_xlabel('Frequency')
     axes[1].set_ylabel('Words')
+    # remove extra space between the figures
     plt.tight_layout()
+    # display the plots
     plt.show()
 
 
@@ -365,45 +372,54 @@ def visual4(train, python_text, html_text):
     OUTPUT:
     visual = Subplot with 2 distribution visuals, one for Python, one for HTML
     '''
-#     python_df = train[train['language'] == 'Python']
-#     html_df = train[train['language'] == 'HTML']
-#     python_text = ' '.join(python_df['cleaned_readme_contents'])
-#     html_text = ' '.join(html_df['cleaned_readme_contents'])
-    
+    # get lists of python and html bigrams
     python_bigrams = list(nltk.bigrams(nltk.word_tokenize(python_text)))
     html_bigrams = list(nltk.bigrams(nltk.word_tokenize(html_text)))
-    
+    # get the frequency of each bigram
     python_bigram_freqdist = FreqDist(python_bigrams)
     html_bigram_freqdist = FreqDist(html_bigrams)
-    
+    # filter to get unique bigrams that are not in the other language
     python_unique_bigrams = set(python_bigram_freqdist.keys()) - set(html_bigram_freqdist.keys())
     html_unique_bigrams = set(html_bigram_freqdist.keys()) - set(python_bigram_freqdist.keys())
-    
+    # sort our bigrams lists by the frequency they appear
     sorted_python_bigrams = sorted(python_unique_bigrams, key=lambda x: 
                                    python_bigram_freqdist[x], reverse=True)
     sorted_html_bigrams = sorted(html_unique_bigrams, key=lambda x: 
                                  html_bigram_freqdist[x], reverse=True)
-    
+    # get the top 10 python bigrams and their frequencies
     top_10_python_bigrams = sorted_python_bigrams[:10]
     python_bigram_frequencies = [python_bigram_freqdist[bigram] for 
                                  bigram in top_10_python_bigrams]
+    # get the top 10 html bigrams and their frequencies
     top_10_html_bigrams = sorted_html_bigrams[:10]
     html_bigram_frequencies = [html_bigram_freqdist[bigram] for 
                                bigram in top_10_html_bigrams]
     
+    # create a plot
     plt.figure(figsize=(10, 6))
+    # create horizontal bar graph of python bigram frequencies
     plt.barh(range(10), python_bigram_frequencies, align='center')
+    # change the y ticks to the top 10 python bigrams
     plt.yticks(range(10), top_10_python_bigrams)
+    # add axis labels
     plt.xlabel('Frequency')
     plt.ylabel('Python Bigrams')
+    # add title
     plt.title('Top 10 Bigrams Occurring More Frequently in Python')
+    # display the plot
     plt.show()
+    # create another plot
     plt.figure(figsize=(10, 6))
+    # create horizontal bar graph of html bigram frequencies
     plt.barh(range(10), html_bigram_frequencies, align='center')
+    # change the y ticks to the top 10 html bigrams
     plt.yticks(range(10), top_10_html_bigrams)
+    # add axis labels
     plt.xlabel('Frequency')
     plt.ylabel('HTML Bigrams')
+    # add title
     plt.title('Top 10 Bigrams Occurring More Frequently in HTML')
+    # display the plot
     plt.show()
 
 # ===============================================================================================
@@ -423,19 +439,32 @@ def visual5(train):
     OUTPUT:
     visual = Distribution of repositories with http words
     '''
+    # get a ratio of repos containing hyperlinks to repos without hyperlinks by language
+    # get only python language repos
+    # get the sum of python repos with hyperlinks
+    # divide by the total number of python repos
     python_http_ratio = train[train.language == 'Python'].\
-        cleaned_readme_contents.str.contains('srchttps_link').sum() / train[
-        train.language == 'Python'].shape[0]
+        cleaned_readme_contents.str.contains('srchttps_link').sum(
+        ) / train[train.language == 'Python'].shape[0]
+    # get only html language repos
+    # get the sum of python repos with hyperlinks
+    # divide by the total number of python repos
     html_http_ratio = train[train.language == 'HTML'].\
-        cleaned_readme_contents.str.contains('srchttps_link').sum() / train[
-        train.language == 'HTML'].shape[0]
+        cleaned_readme_contents.str.contains('srchttps_link').sum(
+        ) / train[train.language == 'HTML'].shape[0]
     
+    # gather the hyperlink ratios into one list
     ratios = [python_http_ratio, html_http_ratio]
+    # create a list of labels for the plot
     labels = ['Python Repo w/ http Link', 'HTML Repo w/ http Link']
     
+    # create a bar graph showing the ratios by language
     plt.bar(labels, ratios)
+    # add axis label
     plt.ylabel('Ratio')
+    # add title
     plt.title('Ratio of http Links of Python Vs. HTML')
+    # display the plot
     plt.show()
 
 # ===============================================================================================
@@ -456,17 +485,24 @@ def stat1(train):
     OUTPUT:
     Stat = Accept/reject null hypothesis with the p-value
     '''
+    # set the hypothesis test alpha
     alpha = 0.05
+    # get a crosstab of language by how many repos contain hyperlinks
     observed = pd.crosstab(train.language,
                            train.cleaned_readme_contents.str.contains('srchttps_link'))
+    # run a chi-squared test on the crosstab
     chi2, p, _, hypothetical = stats.chi2_contingency(observed)
     
+    # check if the p-value is less than our alpha
     if p < alpha:
+        # reject the null hypothesis and display the results
         print('\033[32m========== REJECT THE NULL HYPOTHESIS! ==========\033[0m')
         print(f'\033[35mP-Value:\033[0m {p:.8f}')
         print(f'\033[35mChi-Squared-Value:\033[0m {chi2:.8f}')
+    # if the p-value >= alpha, then we fail to reject the null hypothesis
     else:
-        print('\033[31m========== ACCEPT THE NULL HYPOTHESIS! ==========\033[0m')
+        # fail to reject null, and display the p-value
+        print('\033[31m========== FAIL TO REJECT THE NULL HYPOTHESIS! ==========\033[0m')
         print(f'\033[35mP-Value:\033[0m {p:.8f}')
 
 # ==============================================================================================
